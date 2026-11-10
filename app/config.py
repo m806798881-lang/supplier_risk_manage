@@ -4,7 +4,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file='.env', env_file_encoding='UTF-8')
+        env_file='.env', env_file_encoding='UTF-8', extra='ignore')
 
     # JWT
     secret_key: str = "dev-secret-key-CHANGE-ME-in-production"

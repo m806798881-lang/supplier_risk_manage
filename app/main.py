@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -85,8 +85,10 @@ async def get_current_user(current_user: models.User = Depends(deps.get_current_
 # ---------- supplier ----------
 # ---------- 列表 ----------
 @app.get('/suppliers/', response_model=list[schemas.SupplierOut], tags=["供应商"])
-async def list_suppliers(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db), current_user: models.User = Depends(deps.get_current_active_user)):
-    return await crud.list_suppliers(db, skip, limit)
+async def list_suppliers(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db), search: str | None = Query(None, description='按供应商名称模糊搜索'), current_user: models.User = Depends(deps.get_current_active_user)):
+    # if search:
+    #     return await crud.search_suppliers(db, search, skip, limit)
+    return await crud.list_suppliers(db, skip, limit, search)
 
 
 @app.get('/suppliers/me', response_model=list[schemas.SupplierOut], tags=["供应商"])
@@ -161,7 +163,7 @@ async def list_risks(supplier_id: int, db: AsyncSession = Depends(get_db), curre
     if supplier is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"供应商 {supplier_id} 不存在")
-    await crud.list_risks_by_supplier(db, supplier_id)
+    return await crud.list_risks_by_supplier(db, supplier_id)
 
 
 @app.get("/suppliers/{supplier_id}/risks/{risk_id}", response_model=schemas.RiskOut, tags=['风险记录'])

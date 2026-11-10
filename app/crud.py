@@ -19,11 +19,22 @@ async def create_supplier(data: schemas.SupplierCreate, db: AsyncSession, create
 # 管理员/审计员看全部，其他人只看自己创建的
 
 
-async def list_suppliers(db: AsyncSession, skip: int = 0, limit: int = 100) -> list[models.Supplier]:
-    stmt = select(models.Supplier).offset(skip).limit(
+async def list_suppliers(db: AsyncSession, skip: int = 0, limit: int = 100, search: str | None = None) -> list[models.Supplier]:
+    stmt = select(models.Supplier)
+    if search:
+        stmt = stmt.where(
+            models.Supplier.name.ilike(f'%{search}%'))
+    stmt = stmt.offset(skip).limit(
         limit).order_by(models.Supplier.id)
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+
+# async def search_suppliers(db: AsyncSession, keyword: str, skip: int = 0, limit: int = 100) -> list[models.Supplier]:
+#     stmt = select(models.Supplier).where(models.Supplier.name.ilike(
+#         f'%{keyword}%')).offset(skip).limit(limit).order_by(models.Supplier.id)
+#     result = await db.execute(stmt)
+#     return list(result.scalars().all())
 
 
 async def list_suppliers_by_creator(db: AsyncSession, creator_id: int, skip: int = 0, limit: int = 100) -> list[models.Supplier]:
@@ -69,6 +80,8 @@ async def delete_supplier(db: AsyncSession, supplier_id: int) -> bool:
 
 async def create_risk(data: schemas.RiskCreate, assessor: str, supplier_id: int, db: AsyncSession) -> models.RiskAssessment:
     risk = models.RiskAssessment(**data.model_dump(),
+                                 level=models.RiskAssessment.cal_level(
+                                     data.score),
                                  assessor=assessor,
                                  supplier_id=supplier_id)
     db.add(risk)
