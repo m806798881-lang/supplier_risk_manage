@@ -58,6 +58,9 @@ def load_split_docs():
     return source_context_chunks
 
 
+source_context_chunks = load_split_docs()
+
+
 # 3.初始化嵌入模型
 embeddings = OllamaEmbeddings(model='qwen3-embedding:0.6b')
 # 4.入库与持久化：Chroma.from_documents

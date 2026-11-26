@@ -11,7 +11,10 @@ PASSWORD = os.getenv('AGENT_API_PASSWORD', '')
 
 
 class APIError(Exception):
-    """API 调用失败，携带可读信息供 Tool 转成自然语言"""
+    """
+    API 调用失败，携带可读信息供 Tool 转成自然语言
+    API 调用在预期内的失败——连不上、认证失败、返回了错误状态码。
+    """
     pass
 
 
